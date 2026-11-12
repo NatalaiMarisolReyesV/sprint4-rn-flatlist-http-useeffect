@@ -26,7 +26,7 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **¿Por qué guardo los personajes en estado y no en una variable normal?**
 
-> 
+> If I stored the characters in a normal variable, React would not know it changed, so the screen would not re-render and the new data would not appear. Also, a normal variable is reset on every render. State keeps its value between renders and triggers a re-render when it is updated.
 
 ## Paso 4 · useEffect
 

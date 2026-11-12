@@ -56,7 +56,7 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **¿Por qué es mejor mostrar un mensaje con un botón "Reintentar" que dejar la pantalla vacía?**
 
-> 
+> An empty screen gives no information, so the user cannot tell if the app is broken, loading or has no data. A clear message explains what happened, and the "Retry" button lets the user fix the problem (for example after reconnecting) without restarting the app. 
 
 ## Paso 8 · Paginación
 

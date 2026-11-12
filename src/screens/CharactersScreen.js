@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { COLORS } from '../config/constants';
 import { getCharacters } from '../services/charactersService';
 import CharacterCard from '../components/CharacterCard';
+import StateMessage from '../components/StateMessage';
 
 // ✍️ LO PROGRAMAS TÚ (Pasos 3 al 10)
 //
@@ -18,9 +19,14 @@ export default function CharactersScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Paso 4: primera carga de datos al montar la pantalla.
+  // Paso 6: contador que sube con cada "Reintentar" para volver a correr el efecto.
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Paso 4 y 6: carga inicial (se repite cuando cambia reloadKey).
   useEffect(() => {
     async function loadCharacters() {
+      setLoading(true);
+      setError(null);
       try {
         const { results } = await getCharacters({ page: 1 });
         setCharacters(results);
@@ -32,12 +38,36 @@ export default function CharactersScreen() {
     }
 
     loadCharacters();
-  }, []);
+  }, [reloadKey]);
 
-  // TODO Paso 6: estados de carga / error y reintento.
   // TODO Paso 8: paginación (estado extra + función para cargar más).
   // TODO Paso 9: pull to refresh.
   // TODO Paso 10: búsqueda con debounce.
+
+  function renderContent() {
+    if (loading) {
+      return <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />;
+    }
+
+    if (error && characters.length === 0) {
+      return (
+        <StateMessage
+          message={error}
+          actionLabel="Reintentar"
+          onAction={() => setReloadKey((key) => key + 1)}
+        />
+      );
+    }
+
+    return (
+      <FlatList
+        data={characters}
+        renderItem={({ item }) => <CharacterCard character={item} />}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -45,13 +75,7 @@ export default function CharactersScreen() {
 
       {/* TODO Paso 10: aquí va el campo de búsqueda. */}
 
-      {/* Paso 5: lista de personajes. */}
-      <FlatList
-        data={characters}
-        renderItem={({ item }) => <CharacterCard character={item} />}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.listContent}
-      />
+      {renderContent()}
     </View>
   );
 }

@@ -2,7 +2,7 @@
 
 _Escribe tus respuestas debajo de cada pregunta._
 
-**Alumno:**
+**Alumno:** Marisol Reyes
 
 ---
 
@@ -10,11 +10,11 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 | Pregunta | Mi respuesta |
 |---|---|
-| ¿Cuántos personajes trae cada página? | |
-| ¿Qué campo me dice si existe una página siguiente? | |
-| ¿Qué valor tiene ese campo en la última página? | |
-| ¿Qué código HTTP devuelve una búsqueda sin resultados? | |
-| ¿Qué campos del personaje usa `CharacterCard`? | |
+| ¿Cuántos personajes trae cada página? | 20 characters per page. |
+| ¿Qué campo me dice si existe una página siguiente? | `info.next`, which contains the URL of the next page. |
+| ¿Qué valor tiene ese campo en la última página? | `null`. |
+| ¿Qué código HTTP devuelve una búsqueda sin resultados? | 404 (with the body `{"error":"There is nothing here"}`). |
+| ¿Qué campos del personaje usa `CharacterCard`? | `name`, `status`, `species` and `image`. |
 
 ## Paso 2 · Petición HTTP
 
@@ -88,4 +88,4 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **Menciona dos mejoras que le harías a la app si tuvieras una hora más:**
 
-> 
+>

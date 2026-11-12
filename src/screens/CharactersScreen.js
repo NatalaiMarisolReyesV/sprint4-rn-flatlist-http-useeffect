@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
-import { COLORS } from '../config/constants';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import { COLORS, DEBOUNCE_MS } from '../config/constants';
 import { getCharacters } from '../services/charactersService';
 import CharacterCard from '../components/CharacterCard';
 import StateMessage from '../components/StateMessage';
-
-// ✍️ LO PROGRAMAS TÚ (Pasos 3 al 10)
-//
-// Sigue la GUIA_ALUMNO.md. Cada TODO indica en qué paso debes trabajar
-// en ese punto. Puedes borrar los comentarios TODO conforme los resuelvas.
-//
-// Los estilos de abajo ya están listos. Nombres disponibles:
-//   container, title, input, loader, separator, listContent, footer, footerError
 
 // Paso 7: separador definido fuera del componente para que no se recree en cada render.
 function ItemSeparator() {
@@ -38,37 +37,76 @@ export default function CharactersScreen() {
   // Paso 9: estado propio para el gesto de jalar hacia abajo.
   const [refreshing, setRefreshing] = useState(false);
 
-  // Paso 4, 6 y 8: carga inicial (se repite cuando cambia reloadKey).
+  // Paso 10: lo que el usuario escribe (cambia en cada tecla)...
+  const [searchText, setSearchText] = useState('');
+  // ...y el texto que realmente se usa para buscar (cambia al dejar de escribir).
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Paso 10: siempre guarda la búsqueda vigente, para descartar respuestas viejas.
+  const searchRef = useRef('');
+  searchRef.current = debouncedSearch;
+
+  // Paso 10: debounce. Espera DEBOUNCE_MS después de la última tecla.
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText.trim());
+    }, DEBOUNCE_MS);
+
+    // Limpieza: si el usuario sigue escribiendo, el temporizador anterior se cancela.
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  // Paso 4, 6, 8 y 10: carga inicial. Se repite con "Reintentar" o con una búsqueda nueva.
+  useEffect(() => {
+    // Paso 10: si esta petición queda vieja (cambió la búsqueda), se ignora su respuesta.
+    let ignore = false;
+
     async function loadCharacters() {
       setLoading(true);
       setError(null);
+      setCharacters([]);
       try {
-        const { results, hasNextPage: more } = await getCharacters({ page: 1 });
+        const { results, hasNextPage: more } = await getCharacters({
+          page: 1,
+          name: debouncedSearch,
+        });
+        if (ignore) return;
         setCharacters(results);
         setPage(1);
         setHasNextPage(more);
       } catch (e) {
+        if (ignore) return;
         setError(e.message);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }
 
     loadCharacters();
-  }, [reloadKey]);
 
-  // Paso 8: cargar la página siguiente.
+    // Limpieza: se ejecuta antes del siguiente efecto y marca esta petición como vieja.
+    return () => {
+      ignore = true;
+    };
+  }, [reloadKey, debouncedSearch]);
+
+  // Paso 8 y 10: cargar la página siguiente (con la búsqueda vigente).
   async function loadMore() {
     // No tiene sentido si ya se está cargando o actualizando, o si no hay más páginas.
     if (loading || refreshing || loadingMoreRef.current || !hasNextPage) return;
 
+    const search = debouncedSearch;
     loadingMoreRef.current = true;
     setLoadingMore(true);
     setError(null);
     try {
       const nextPage = page + 1;
-      const { results, hasNextPage: more } = await getCharacters({ page: nextPage });
+      const { results, hasNextPage: more } = await getCharacters({
+        page: nextPage,
+        name: search,
+      });
+      // Si la búsqueda cambió mientras tanto, estos resultados ya no sirven.
+      if (search !== searchRef.current) return;
       // Arreglo nuevo: los personajes anteriores + los nuevos.
       setCharacters((previous) => [...previous, ...results]);
       setPage(nextPage);
@@ -82,14 +120,19 @@ export default function CharactersScreen() {
     }
   }
 
-  // Paso 9: volver a pedir la página 1 y reemplazar toda la lista.
+  // Paso 9 y 10: volver a pedir la página 1 (con la búsqueda vigente) y reemplazar la lista.
   async function handleRefresh() {
     if (refreshing || loadingMoreRef.current) return;
 
+    const search = debouncedSearch;
     setRefreshing(true);
     setError(null);
     try {
-      const { results, hasNextPage: more } = await getCharacters({ page: 1 });
+      const { results, hasNextPage: more } = await getCharacters({
+        page: 1,
+        name: search,
+      });
+      if (search !== searchRef.current) return;
       setCharacters(results);
       setPage(1);
       setHasNextPage(more);
@@ -99,8 +142,6 @@ export default function CharactersScreen() {
       setRefreshing(false);
     }
   }
-
-  // TODO Paso 10: búsqueda con debounce.
 
   // Paso 8: indicador o error al final de la lista.
   function renderFooter() {
@@ -141,6 +182,7 @@ export default function CharactersScreen() {
         ListFooterComponent={renderFooter()}
         refreshing={refreshing}
         onRefresh={handleRefresh}
+        keyboardShouldPersistTaps="handled"
       />
     );
   }
@@ -149,7 +191,16 @@ export default function CharactersScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Rick and Morty</Text>
 
-      {/* TODO Paso 10: aquí va el campo de búsqueda. */}
+      {/* Paso 10: el campo va fuera de la parte que cambia (spinner / error / lista). */}
+      <TextInput
+        style={styles.input}
+        value={searchText}
+        onChangeText={setSearchText}
+        placeholder="Search by name"
+        placeholderTextColor={COLORS.textMuted}
+        autoCorrect={false}
+        autoCapitalize="none"
+      />
 
       {renderContent()}
     </View>

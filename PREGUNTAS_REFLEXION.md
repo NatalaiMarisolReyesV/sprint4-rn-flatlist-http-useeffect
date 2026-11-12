@@ -74,15 +74,15 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 1. **¿Qué es el debounce y qué problema resuelve?**
 
-> 
+> Debounce means waiting until the user stops typing for a short time before running an action. It solves the problem of sending one request for every keystroke, which wastes network calls and can overload the API. 
 
 2. **¿Para qué sirve la función de limpieza (cleanup) que se devuelve en un `useEffect`? Da un ejemplo de esta práctica.**
 
-> 
+> The cleanup function runs before the effect runs again and when the component unmounts. It is used to undo what the effect started. In this practice, I use `clearTimeout` in the debounce effect so the previous timer is cancelled while the user keeps typing, and an `ignore` flag in the loading effect to discard old responses. 
 
 3. **Si el usuario escribe rápido y las respuestas llegan en desorden, ¿qué podría salir mal?**
 
-> 
+> An old, slow response could arrive after a newer one and overwrite it, so the screen would show results for a search the user is no longer looking for (for example, "ric" results while the input says "rick"). I avoid it with the `ignore` flag set in the cleanup function. 
 
 ## Cierre
 

@@ -32,15 +32,15 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 1. **¿Qué pasa si omito por completo el arreglo de dependencias?**
 
-> 
+> If I omit the dependency array, the effect runs after every render. Since my effect updates state, it would cause a new render and run again, creating an infinite loop of requests.
 
 2. **¿Qué significa dejar el arreglo vacío?**
 
-> 
+> An empty array means the effect has no dependencies, so React runs it only once, right after the component mounts. It is the right choice for an initial data load.
 
 3. **¿Por qué la función que recibe `useEffect` no debe ser `async` directamente?**
 
-> 
+>> An `async` function always returns a promise, but React expects the effect to return nothing or a cleanup function. So I define an `async` function inside the effect and call it right away.
 
 ## Paso 5 · FlatList
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS } from '../config/constants';
 import { getCharacters } from '../services/charactersService';
@@ -19,7 +19,22 @@ export default function CharactersScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // TODO Paso 4: primera carga de datos con useEffect.
+  // Paso 4: primera carga de datos al montar la pantalla.
+  useEffect(() => {
+    async function loadCharacters() {
+      try {
+        const { results } = await getCharacters({ page: 1 });
+        setCharacters(results);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCharacters();
+  }, []);
+
   // TODO Paso 6: estados de carga / error y reintento.
   // TODO Paso 8: paginación (estado extra + función para cargar más).
   // TODO Paso 9: pull to refresh.
@@ -32,7 +47,14 @@ export default function CharactersScreen() {
       {/* TODO Paso 10: aquí va el campo de búsqueda. */}
 
       {/* TODO Paso 5: sustituye este texto por tu FlatList. */}
-      <Text style={styles.placeholder}>Aquí aparecerá la lista de personajes.</Text>
+      {/* Texto temporal para comprobar el Paso 4. */}
+      <Text style={styles.placeholder}>
+        {error
+          ? `Error: ${error}`
+          : loading
+            ? 'Loading...'
+            : `${characters.length} characters loaded`}
+      </Text>
     </View>
   );
 }

@@ -13,6 +13,11 @@ import StateMessage from '../components/StateMessage';
 // Los estilos de abajo ya están listos. Nombres disponibles:
 //   container, title, input, loader, separator, listContent, footer, footerError
 
+// Paso 7: separador definido fuera del componente para que no se recree en cada render.
+function ItemSeparator() {
+  return <View style={styles.separator} />;
+}
+
 export default function CharactersScreen() {
   // Paso 3: estados de la pantalla.
   const [characters, setCharacters] = useState([]);
@@ -65,6 +70,8 @@ export default function CharactersScreen() {
         renderItem={({ item }) => <CharacterCard character={item} />}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.listContent}
+        ItemSeparatorComponent={ItemSeparator}
+        ListEmptyComponent={<StateMessage message="No characters to show." />}
       />
     );
   }

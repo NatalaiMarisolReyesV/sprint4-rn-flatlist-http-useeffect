@@ -20,7 +20,7 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **¿Qué diferencia hay entre que `fetch` "falle" y que el servidor responda con un error? ¿Qué debo revisar en la respuesta?**
 
-> 
+> A `fetch` failure happens only when the request cannot be completed, for example when there is no network, and then the promise is rejected. If the server responds with an error such as 404 or 500, `fetch` does not fail, so I have to check `response.ok` or `response.status` to know if the request was successful.
 
 ## Paso 3 · Estado
 

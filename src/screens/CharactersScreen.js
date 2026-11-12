@@ -35,6 +35,9 @@ export default function CharactersScreen() {
   // Paso 8: bloqueo inmediato para que "cargar más" no se dispare dos veces seguidas.
   const loadingMoreRef = useRef(false);
 
+  // Paso 9: estado propio para el gesto de jalar hacia abajo.
+  const [refreshing, setRefreshing] = useState(false);
+
   // Paso 4, 6 y 8: carga inicial (se repite cuando cambia reloadKey).
   useEffect(() => {
     async function loadCharacters() {
@@ -57,8 +60,8 @@ export default function CharactersScreen() {
 
   // Paso 8: cargar la página siguiente.
   async function loadMore() {
-    // No tiene sentido si ya se está cargando, o si la API dice que no hay más páginas.
-    if (loading || loadingMoreRef.current || !hasNextPage) return;
+    // No tiene sentido si ya se está cargando o actualizando, o si no hay más páginas.
+    if (loading || refreshing || loadingMoreRef.current || !hasNextPage) return;
 
     loadingMoreRef.current = true;
     setLoadingMore(true);
@@ -79,7 +82,24 @@ export default function CharactersScreen() {
     }
   }
 
-  // TODO Paso 9: pull to refresh.
+  // Paso 9: volver a pedir la página 1 y reemplazar toda la lista.
+  async function handleRefresh() {
+    if (refreshing || loadingMoreRef.current) return;
+
+    setRefreshing(true);
+    setError(null);
+    try {
+      const { results, hasNextPage: more } = await getCharacters({ page: 1 });
+      setCharacters(results);
+      setPage(1);
+      setHasNextPage(more);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   // TODO Paso 10: búsqueda con debounce.
 
   // Paso 8: indicador o error al final de la lista.
@@ -119,6 +139,8 @@ export default function CharactersScreen() {
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter()}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
     );
   }

@@ -68,7 +68,7 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **¿Por qué usé un estado distinto (`refreshing`) y no el mismo de la carga inicial?**
 
-> 
+> The initial load replaces the whole screen with a spinner, while a refresh should keep the list visible and only show the native pull indicator at the top. With a separate `refreshing` state the screen does not flash a full loader, and `FlatList` can control its own refresh indicator through the `refreshing` prop. 
 
 ## Paso 10 · Búsqueda
 

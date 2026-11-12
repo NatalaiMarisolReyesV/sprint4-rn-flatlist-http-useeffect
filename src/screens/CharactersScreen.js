@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { COLORS } from '../config/constants';
 import { getCharacters } from '../services/charactersService';
@@ -27,14 +27,24 @@ export default function CharactersScreen() {
   // Paso 6: contador que sube con cada "Reintentar" para volver a correr el efecto.
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Paso 4 y 6: carga inicial (se repite cuando cambia reloadKey).
+  // Paso 8: estados de la paginación.
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Paso 8: bloqueo inmediato para que "cargar más" no se dispare dos veces seguidas.
+  const loadingMoreRef = useRef(false);
+
+  // Paso 4, 6 y 8: carga inicial (se repite cuando cambia reloadKey).
   useEffect(() => {
     async function loadCharacters() {
       setLoading(true);
       setError(null);
       try {
-        const { results } = await getCharacters({ page: 1 });
+        const { results, hasNextPage: more } = await getCharacters({ page: 1 });
         setCharacters(results);
+        setPage(1);
+        setHasNextPage(more);
       } catch (e) {
         setError(e.message);
       } finally {
@@ -45,9 +55,43 @@ export default function CharactersScreen() {
     loadCharacters();
   }, [reloadKey]);
 
-  // TODO Paso 8: paginación (estado extra + función para cargar más).
+  // Paso 8: cargar la página siguiente.
+  async function loadMore() {
+    // No tiene sentido si ya se está cargando, o si la API dice que no hay más páginas.
+    if (loading || loadingMoreRef.current || !hasNextPage) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const nextPage = page + 1;
+      const { results, hasNextPage: more } = await getCharacters({ page: nextPage });
+      // Arreglo nuevo: los personajes anteriores + los nuevos.
+      setCharacters((previous) => [...previous, ...results]);
+      setPage(nextPage);
+      setHasNextPage(more);
+    } catch (e) {
+      // Solo se guarda el error; los personajes ya cargados se conservan.
+      setError(e.message);
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }
+
   // TODO Paso 9: pull to refresh.
   // TODO Paso 10: búsqueda con debounce.
+
+  // Paso 8: indicador o error al final de la lista.
+  function renderFooter() {
+    if (loadingMore) {
+      return <ActivityIndicator style={styles.footer} color={COLORS.primary} />;
+    }
+    if (error && characters.length > 0) {
+      return <Text style={styles.footerError}>{error}</Text>;
+    }
+    return null;
+  }
 
   function renderContent() {
     if (loading) {
@@ -72,6 +116,9 @@ export default function CharactersScreen() {
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={ItemSeparator}
         ListEmptyComponent={<StateMessage message="No characters to show." />}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter()}
       />
     );
   }

@@ -62,7 +62,7 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **¿Qué problema aparece si la función de "cargar más" se dispara varias veces seguidas? ¿Cómo lo evité?**
 
-> 
+> If "load more" fires several times in a row, the app can request the same page more than once, which creates duplicated characters and duplicated keys, and the API can answer with a 429 (too many requests). I avoided it by returning early when it is already loading, using a `useRef` flag that changes immediately (state updates are asynchronous), or when the API says there is no next page. 
 
 ## Paso 9 · Pull to refresh
 

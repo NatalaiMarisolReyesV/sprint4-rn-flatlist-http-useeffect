@@ -46,11 +46,11 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 1. **¿Para qué sirve la prop que extrae la llave de cada elemento?**
 
-> 
+> The `keyExtractor` prop gives each item a unique and stable key, usually its `id`. React uses it to identify which items were added, removed or moved, so it can update the list efficiently and avoid warnings or rendering bugs.
 
 2. **¿Por qué usar `FlatList` en lugar de un `ScrollView` con `.map()`?**
 
-> 
+> `FlatList` renders only the items that are visible on screen (plus a few extra), while a `ScrollView` with `.map()` renders every item at once. With hundreds of characters, `FlatList` uses much less memory and is faster. It also gives built-in features such as pagination and pull to refresh.
 
 ## Paso 6 · Carga y error
 

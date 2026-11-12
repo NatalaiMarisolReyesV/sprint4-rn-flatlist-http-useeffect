@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { COLORS } from '../config/constants';
 import { getCharacters } from '../services/charactersService';
+import CharacterCard from '../components/CharacterCard';
 
 // ✍️ LO PROGRAMAS TÚ (Pasos 3 al 10)
 //
@@ -10,8 +11,6 @@ import { getCharacters } from '../services/charactersService';
 //
 // Los estilos de abajo ya están listos. Nombres disponibles:
 //   container, title, input, loader, separator, listContent, footer, footerError
-
-// TODO Paso 5: importa lo que falte de 'react-native' y el componente CharacterCard.
 
 export default function CharactersScreen() {
   // Paso 3: estados de la pantalla.
@@ -46,15 +45,13 @@ export default function CharactersScreen() {
 
       {/* TODO Paso 10: aquí va el campo de búsqueda. */}
 
-      {/* TODO Paso 5: sustituye este texto por tu FlatList. */}
-      {/* Texto temporal para comprobar el Paso 4. */}
-      <Text style={styles.placeholder}>
-        {error
-          ? `Error: ${error}`
-          : loading
-            ? 'Loading...'
-            : `${characters.length} characters loaded`}
-      </Text>
+      {/* Paso 5: lista de personajes. */}
+      <FlatList
+        data={characters}
+        renderItem={({ item }) => <CharacterCard character={item} />}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
+      />
     </View>
   );
 }

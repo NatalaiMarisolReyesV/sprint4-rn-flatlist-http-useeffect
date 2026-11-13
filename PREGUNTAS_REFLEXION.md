@@ -88,4 +88,4 @@ _Escribe tus respuestas debajo de cada pregunta._
 
 **Menciona dos mejoras que le harías a la app si tuvieras una hora más:**
 
->
+> 1) I would use `AbortController` to really cancel the previous request when the search changes, instead of only ignoring its response. 2) I would show the characters in a two-column grid and wrap `CharacterCard` with `React.memo`, so the list looks better and avoids unnecessary re-renders.
